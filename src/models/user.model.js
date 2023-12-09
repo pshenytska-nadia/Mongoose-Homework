@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		minLength: 4,
 		maxLength: 50,
-		required: [true],
+		required: true,
 		trim: true,
 	},
 	lastName: {
@@ -61,7 +61,7 @@ userSchema.pre('save', function (next) {
 	this.set({
 		updatedAt: new Date(),
 	});
-	console.log(this.articles);
+
 	this.numberOfArticles = this.articles.length;
 	this.fullName = `${this.firstName} ${this.lastName}`;
 	next();

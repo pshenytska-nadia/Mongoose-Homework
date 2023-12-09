@@ -68,9 +68,6 @@ articleSchema.pre('deleteOne', async function (next) {
 	const index = owner.articles.indexOf(id);
 	owner.articles.splice(index, 1);
 
-	console.log(index);
-	console.log(owner.articles);
-
 	await owner.save();
 
 	next();
