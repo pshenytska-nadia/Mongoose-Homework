@@ -6,6 +6,7 @@ import {
   getArticles,
   getArticleById,
 } from '../controllers/article.controller.js';
+import { checkAuth } from '../middleware/auth.mdware.js';
 
 const articleRouter = Router();
 
@@ -13,7 +14,7 @@ articleRouter
   .get('/', getArticles)
   .get('/:id', getArticleById)
   .post('/', createArticle)
-  .put('/:id', updateArticleById)
+  .put('/:id',checkAuth, updateArticleById)
   .delete('/:id', deleteArticleById);
 
 export default articleRouter;

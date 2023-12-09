@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
+import Article from './article.model.js';
 
 const userSchema = new mongoose.Schema({
 	firstName: {
 		type: String,
 		minLength: 4,
 		maxLength: 50,
-		required: true,
+		required: [true],
 		trim: true,
 	},
 	lastName: {
@@ -48,13 +49,20 @@ const userSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now,
 	},
+	articles: [
+		{
+			type: mongoose.Types.ObjectId,
+			ref: 'Article',
+		},
+	],
 });
 
 userSchema.pre('save', function (next) {
 	this.set({
 		updatedAt: new Date(),
 	});
-
+	console.log(this.articles);
+	this.numberOfArticles = this.articles.length;
 	this.fullName = `${this.firstName} ${this.lastName}`;
 	next();
 });
@@ -64,6 +72,17 @@ userSchema.pre('validate', function (next) {
 		this.age = 1;
 	}
 	next();
+});
+
+userSchema.pre('deleteOne', async function (next) {
+	try {
+		const userId = this.getQuery()['_id'];
+		await Article.deleteMany({ owner: userId });
+
+		next();
+	} catch (error) {
+		next(error);
+	}
 });
 
 const User = mongoose.model('User', userSchema);

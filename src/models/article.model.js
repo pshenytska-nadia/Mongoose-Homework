@@ -42,8 +42,10 @@ const articleSchema = new mongoose.Schema({
 });
 
 articleSchema.pre('save', async function (next) {
+	this.set({ updatedAt: new Date() });
+
 	const ownerId = this.owner;
-	const owner = await User.findById({ _id: ownerId });
+	const owner = await User.findById(ownerId);
 
 	if (!owner) {
 		next(
@@ -53,28 +55,24 @@ articleSchema.pre('save', async function (next) {
 		);
 	}
 
-	owner.numberOfArticles += 1;
+	owner.articles.push(this._id);
 	await owner.save();
 
 	next();
 });
 
-articleSchema.pre(
-	'deleteOne',
-	{ document: true, query: false },
-	async function (next) {
-		const ownerId = this.owner;
-		const owner = await User.findById({ _id: ownerId });
+articleSchema.pre('deleteOne', async function (next) {
+	const id = this.getQuery()['_id'];
+	const owner = await User.findOne({ articles: id });
 
-		owner.numberOfArticles -= 1;
-		await owner.save();
+	const index = owner.articles.indexOf(id);
+	owner.articles.splice(index, 1);
 
-		next();
-	},
-);
+	console.log(index);
+	console.log(owner.articles);
 
-articleSchema.pre('findOneAndUpdate', function (next) {
-	this.set({ updatedAt: new Date() });
+	await owner.save();
+
 	next();
 });
 
